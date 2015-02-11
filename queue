@@ -1,0 +1,124 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <sys/queue.h>
+
+
+typedef struct {
+	char * inner;
+	char * front;
+	char * rear;
+} stream;
+
+/***Caution!!!, don't call below if your queue has stuff in it, the data will be orphaned!!***/
+void init_queue(stream * s){
+	s->inner = NULL;
+	s->front = NULL;
+	s->rear = NULL;
+}
+
+int is_queue_empty(stream * s){
+	if((s->inner == NULL) && (s->front == NULL) && (s->rear == NULL)) {
+		return 1;
+	}
+	return 0;
+}
+void print_queue(stream * s);
+void en_queue(stream * s, char * input){
+
+	char * local;
+
+	int input_length = strlen(input);
+	//printf("\ninput_length is : %d", input_length);
+	int i;
+	if(is_queue_empty(s)){
+		local = (char *)malloc(input_length+1);
+		if(local!=0){
+			s->front = local; 
+			s->inner = local;
+			s->rear = s->front + (input_length-1);
+			for(i = 0; i<input_length; i++){
+					*(s->front + i) = *(input + i);
+			}
+						*(local + input_length) = '\0';
+
+		}
+		else{
+			printf("Out of memory! -- en_queue()\n");
+			exit(-1);
+		}
+		
+	}
+	else{
+			//int orig_length = strlen(s->front);
+			//printf("\norig_length is : %d", orig_length);
+			
+		int current_length = strlen(s->front);
+		int offset;
+		offset = (s->inner - s->front);
+		local = realloc(s->front, (current_length+input_length+1));
+		// printf("\nsize after realloc is : %d", strlen(local));
+		//printf("\nlocal = %p\n", local);
+		if(local!=0){
+				s->front = local;
+				strcat(s->front, input);
+				s->inner = local + offset;
+				s->rear = s->front + current_length  + input_length - 1;
+			local = s->front + current_length;//s->rear - (input_length-1);
+			//	printf("local is now: %p\n", local);
+			
+			for(i=0; i<input_length; i++){
+			*(local + i) = *(input + i);
+			
+			}
+			*(local + input_length) = '\0';
+			
+			//printf("value at the rear: %c\n", *(s->rear));
+
+			//int length = strlen(s->front);
+			//printf("length: %d\n",length);
+		}
+		else{
+			printf("Out of Memory! -- en_queue\n");
+			exit(-1);
+		}
+
+		
+	}
+			//printf("\n");
+			//printf("");
+			//print_queue(s);
+	
+	//printf("front: %p\n",s->front);
+	//printf("rear: %p\n",s->rear);
+}
+
+void print_queue(stream * s){
+	
+	int i;
+	int length = strlen(s->front);
+	//printf("length: %d\n",length);
+	//for(i=0; i < length; i++){
+	printf("%s",s->front);
+	//}
+}
+
+void de_queue(stream * s);
+
+int main(int argc, char **argv){
+	stream input;
+	init_queue(&input);
+	int i;
+
+	for(i = 0; i<100000; i++){
+		en_queue(&input, "cSc|");
+	}
+	en_queue(&input, "test");
+	//printf("\n\n");
+	//print_queue(&input);
+	//printf("\nsizeof(input.front) is %d\n", strlen(input.front));
+	
+	free(input.front);
+	//getchar();
+	return 0;
+}
